@@ -2,9 +2,6 @@ Flask
 gunicorn
 numpy
 scikit-learn
-pandas
-numpy
-scikit-learn
-pandas
+
 
 
