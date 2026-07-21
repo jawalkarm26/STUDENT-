@@ -1,32 +1,35 @@
-from flask import Flask, request, render_template
-import pickle
+from flask import Flask, request, jsonify
+import joblib
 import numpy as np
 
 app = Flask(__name__)
 
-# Load model
-model = pickle.load(open("model.pkl", "rb"))
+model = joblib.load("model.pkl")
 
 @app.route("/")
 def home():
-    return render_template("index.html")
+    return "Model is running successfully!"
 
 @app.route("/predict", methods=["POST"])
 def predict():
     try:
-        features = [float(x) for x in request.form.values()]
-        final_features = np.array(features).reshape(1, -1)
-        prediction = model.predict(final_features)
+        data = request.get_json()
 
-        return render_template(
-            "index.html",
-            prediction_text=f"Prediction: {prediction[0]}"
-        )
+        # Example:
+        # {
+        #   "features": [5.1, 3.5, 1.4, 0.2]
+        # }
+
+        features = np.array(data["features"]).reshape(1, -1)
+
+        prediction = model.predict(features)
+
+        return jsonify({
+            "prediction": prediction.tolist()
+        })
+
     except Exception as e:
-        return render_template(
-            "index.html",
-            prediction_text=f"Error: {e}"
-        )
+        return jsonify({"error": str(e)})
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
